@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="../assets/WTF.js" charset="utf-8"></script>
+    <link rel="stylesheet" href="../assets/reset.css">
+    <title>demo03</title>
+</head>
+
+<body>
+
+    <script type="text/v-shader" id="v-shader">
+        attribute vec4 a_Pos; void main(){ gl_Position = a_Pos ;gl_PointSize = 10.0; }
+    </script>
+    <script type="text/f-shader" id="f-shader">
+        precision mediump float; uniform vec4 u_Color; void main(){ gl_FragColor = u_Color; }
+    </script>
+    <canvas id="app">
+
+</canvas>
+    <script type="text/javascript">
+        function main() {
+            const canvas = document.getElementById('app');
+            canvas.width = 800;
+            canvas.height = 800;
+            const gl = canvas.getContext('webgl');
+            const vshader = WTF.createShader(gl, gl.VERTEX_SHADER, 'v-shader');
+            const fshader = WTF.createShader(gl, gl.FRAGMENT_SHADER, 'f-shader');
+            const program = WTF.createProgram(gl, vshader, fshader);
+            gl.clearColor(0.0, 0.0, 0.0, 1.0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.useProgram(program);
+            const a_Pos = gl.getAttribLocation(program, 'a_Pos');
+            const u_Color = gl.getUniformLocation(program, 'u_Color');
+            const gl_Points = [],
+                gl_Colors = [];
+            canvas.addEventListener('click', (e) => {
+                gl.clear(gl.COLOR_BUFFER_BIT);
+                e.preventDefault();
+                let x = e.clientX;
+                let y = e.clientY;
+                const rect = canvas.getBoundingClientRect();
+                x = ((x - rect.left) - canvas.width / 2) / (canvas.width / 2);
+                y = (canvas, canvas.height / 2 - (y - rect.top)) / (canvas.height / 2);
+                console.log(x, y);
+                gl_Points.push([x, y]);
+                gl_Colors.push([Math.random(), Math.random(), Math.random(), 1.0])
+                gl_Points.forEach((item, index) => {
+                    gl.vertexAttrib3f(a_Pos, item[0], item[1], 0.0);
+                    gl.uniform4f(u_Color, gl_Colors[index][0], gl_Colors[index][1], gl_Colors[index][2], gl_Colors[index][3])
+                    gl.drawArrays(gl.POINTS, 0, 1);
+
+                })
+            })
+
+        }
+        main()
+    </script>
+</body>
+
+</html>
